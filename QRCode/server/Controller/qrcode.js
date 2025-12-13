@@ -48,8 +48,7 @@ export const scanQRCode = async (req, res) => {
             return res.status(404).json({ error: "QR not found" });
         }
 
-        // Redirect to the current URL stored in database
-        // This ensures old QR codes always show the latest updated URL
+        // Redirect to the current URL stored in database        
         res.redirect(qr.url);
     } catch (error) {
         console.error("❌ Error in scanQRCode:", error);
