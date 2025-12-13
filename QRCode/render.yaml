@@ -2,10 +2,10 @@ services:
   - type: web
     name: qrcode-backend
     env: node
-    # Update this based on your actual repository structure
-    # If server is at root: rootDir: server
-    # If server is in QRCode folder: rootDir: QRCode/server
-    rootDir: QRCode/server
+    # Root directory - adjust based on your GitHub repo structure
+    # If repo root contains server/: rootDir: server
+    # If repo root contains QRCode/server/: rootDir: QRCode/server
+    rootDir: server
     buildCommand: npm install
     startCommand: npm start
     envVars:
