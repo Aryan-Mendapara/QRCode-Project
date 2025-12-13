@@ -24,7 +24,7 @@ export const getQRCodes = async () => {
         throw error;
     }
 }
-
+ 
 export const updateQRCode = async (id, data) => {
     try {
         const response = await axios.put(

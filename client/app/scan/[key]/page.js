@@ -37,3 +37,4 @@ export default function ScanPage({ params }) {
     </div>
   );
 }
+ 

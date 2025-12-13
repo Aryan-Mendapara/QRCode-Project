@@ -111,7 +111,7 @@ export default function HomePage() {
               size={200}
             />
 
-            <button
+            <button 
               onClick={() => setShowQRIndex(null)}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded cursor-pointer"
             >
