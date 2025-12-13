@@ -5,7 +5,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import PostgresConnection from './DBConnection/PostgresConnection.js';
 import router from './Routes/main.js';
-import { initializePool, initializeTable } from './models/QRCode.js';
+import { initializePool, initializeTable } from './models/qecode.js';
 
 const app = express();
 const server = createServer(app);

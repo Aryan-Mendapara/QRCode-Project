@@ -1,4 +1,4 @@
-import { deleteQRCodeById, getAllQRCodes, getQRCodeByKey, insertQRCode, updateQRCodeById } from "../models/QRCode.js";
+import { deleteQRCodeById, getAllQRCodes, getQRCodeByKey, insertQRCode, updateQRCodeById } from "../models/qecode.js";
 
 export const addQRCode = async (req, res) => {
     try {
