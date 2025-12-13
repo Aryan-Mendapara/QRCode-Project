@@ -2,19 +2,31 @@
 
 ## PostgreSQL Connection Setup
 
-### Option 1: Using Render PostgreSQL Database (Recommended)
+### ⚠️ IMPORTANT: DATABASE_URL is Required in Production
+
+The code **requires** `DATABASE_URL` environment variable when running on Render. Without it, the app will fail to start.
+
+### Option 1: Using Render PostgreSQL Database (Recommended - Easiest)
 
 1. **Create PostgreSQL Database in Render:**
    - Go to Render Dashboard → New → PostgreSQL
    - Create a new PostgreSQL database
-   - Note the connection details
+   - Wait for it to be fully provisioned
 
-2. **Link Database to Your Service:**
-   - Go to your Web Service → Settings → Environment
-   - Click "Link Database" and select your PostgreSQL database
+2. **Link Database to Your Web Service:**
+   - Go to your **Web Service** (not the database) → Settings → Environment
+   - Scroll down to "Environment Variables" section
+   - Click **"Link Database"** button
+   - Select your PostgreSQL database from the dropdown
+   - Click "Link"
    - Render will automatically add `DATABASE_URL` environment variable
 
-3. **The code will automatically use `DATABASE_URL` if available**
+3. **Verify DATABASE_URL is set:**
+   - After linking, you should see `DATABASE_URL` in the environment variables list
+   - It should look like: `postgresql://user:password@host:port/database`
+
+4. **Redeploy your service:**
+   - The service will automatically redeploy, or you can manually trigger a deploy
 
 ### Option 2: Using External Database (Manual Setup)
 

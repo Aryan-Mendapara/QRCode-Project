@@ -14,7 +14,13 @@ export const initializePool = () => {
         });
         console.log("📌 Initializing Pool with DATABASE_URL connection string");
     } else {
-        // Use individual environment variables (local development)
+        // Check if we're in production without DATABASE_URL
+        if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+            console.error("❌ ERROR: DATABASE_URL is required in production!");
+            throw new Error("DATABASE_URL environment variable is required in production");
+        }
+        
+        // Use individual environment variables (local development only)
         console.log("📌 Initializing Pool with individual env vars: ", {
             user: process.env.PG_USER,
             host: process.env.PG_HOST,

@@ -14,7 +14,24 @@ export default async function postgresConnect() {
     });
     console.log("📌 Using DATABASE_URL connection string");
   } else {
-    // Use individual environment variables (local development)
+    // Check if we're in production without DATABASE_URL
+    if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+      console.error("❌ ERROR: DATABASE_URL is required in production!");
+      console.error("Please set DATABASE_URL environment variable in Render Dashboard:");
+      console.error("1. Go to your service → Settings → Environment");
+      console.error("2. Link your PostgreSQL database, OR");
+      console.error("3. Add DATABASE_URL manually with your connection string");
+      throw new Error("DATABASE_URL environment variable is required in production");
+    }
+    
+    // Use individual environment variables (local development only)
+    if (!process.env.PG_USER || !process.env.PG_DATABASE) {
+      console.error("❌ ERROR: Database configuration missing!");
+      console.error("For local dev, set: PG_USER, PG_HOST, PG_DATABASE, PG_PASSWORD, PG_PORT");
+      console.error("For production, set: DATABASE_URL");
+      throw new Error("Database configuration is missing");
+    }
+    
     pool = new Pool({
       user: process.env.PG_USER,
       host: process.env.PG_HOST || 'localhost',
@@ -22,7 +39,7 @@ export default async function postgresConnect() {
       password: String(process.env.PG_PASSWORD),
       port: Number(process.env.PG_PORT) || 5432,
     });
-    console.log("📌 Using individual environment variables");
+    console.log("📌 Using individual environment variables (local dev)");
   }
 
   try { 
