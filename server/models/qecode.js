@@ -8,11 +8,17 @@ export const initializePool = () => {
     if (process.env.DATABASE_URL || process.env.EXTERNAL_DATABASE_URL) {
         // Use connection string (Render/Heroku style)
         const connectionString = process.env.DATABASE_URL || process.env.EXTERNAL_DATABASE_URL;
+        const forceSsl =
+            (process.env.DATABASE_SSL || '').toLowerCase() === 'true' ||
+            (process.env.NODE_ENV || 'development') === 'production' ||
+            process.env.RENDER ||
+            connectionString.includes('render.com');
         pool = new Pool({
             connectionString: connectionString,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+            ssl: forceSsl ? { rejectUnauthorized: false } : false
         });
         console.log("📌 Initializing Pool with DATABASE_URL connection string");
+        console.log(`🔐 SSL ${forceSsl ? 'enabled' : 'disabled'} for DATABASE_URL`);
     } else {
         // Check if we're in production without DATABASE_URL
         if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
