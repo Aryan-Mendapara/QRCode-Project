@@ -6,8 +6,27 @@ let pool;
 export const initializePool = () => {
     // Support both DATABASE_URL (Render/Heroku) and individual env vars (local dev)
     if (process.env.DATABASE_URL || process.env.EXTERNAL_DATABASE_URL) {
-        // Use connection string (Render/Heroku style)
-        const connectionString = process.env.DATABASE_URL || process.env.EXTERNAL_DATABASE_URL;
+        // Prefer EXTERNAL_DATABASE_URL for local, fall back to DATABASE_URL
+        const connectionString =
+            process.env.EXTERNAL_DATABASE_URL ||
+            process.env.DATABASE_URL;
+
+        if (!connectionString) {
+            throw new Error("❌ DATABASE_URL/EXTERNAL_DATABASE_URL is not set");
+        }
+
+        // Guard against internal-only hostnames (e.g., missing domain)
+        try {
+            const host = new URL(connectionString).hostname;
+            if (!host || !host.includes('.')) {
+                throw new Error(
+                    `Invalid database host "${host}". Use the external/public connection string (set EXTERNAL_DATABASE_URL).`
+                );
+            }
+        } catch (err) {
+            throw new Error(`❌ Invalid connection string: ${err.message}`);
+        }
+
         const forceSsl =
             (process.env.DATABASE_SSL || '').toLowerCase() === 'true' ||
             (process.env.NODE_ENV || 'development') === 'production' ||
