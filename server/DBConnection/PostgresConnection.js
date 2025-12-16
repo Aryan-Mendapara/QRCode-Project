@@ -70,16 +70,19 @@ export default async function postgresConnect() {
       throw new Error("❌ DATABASE_URL/EXTERNAL_DATABASE_URL is not set");
     }
 
-    // Guard against internal-only hostnames (e.g., missing domain)
-    try {
-      const host = new URL(connectionString).hostname;
-      if (!host || !host.includes('.')) {
-        throw new Error(
-          `Invalid database host "${host}". Use the external/public connection string (set EXTERNAL_DATABASE_URL).`
-        );
+    // Guard against clearly invalid hosts only for local dev.
+    // On Render we trust their internal hostname (even if it has no dot).
+    if (!isRender) {
+      try {
+        const host = new URL(connectionString).hostname;
+        if (!host || !host.includes('.')) {
+          throw new Error(
+            `Invalid database host "${host}". Use the external/public connection string (set EXTERNAL_DATABASE_URL).`
+          );
+        }
+      } catch (err) {
+        throw new Error(`❌ Invalid connection string: ${err.message}`);
       }
-    } catch (err) {
-      throw new Error(`❌ Invalid connection string: ${err.message}`);
     }
 
     const forceSsl =
