@@ -14,7 +14,7 @@ const port = process.env.PORT;
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://qrcode-project-omega.vercel.app/"
+        "https://qrcode-project-omega.vercel.app"
     ],
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true
