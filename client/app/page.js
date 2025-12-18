@@ -120,8 +120,8 @@ export default function HomePage() {
 
       {/* Update Modal */}
       {updateItem && (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center">
-          <div className="bg-black dark:bg-white text-white dark:text-black p-6 rounded shadow w-96">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white dark:bg-gray-800 text-black p-6 rounded shadow w-96">
             <h2 className="text-xl font-bold mb-4">Update QR Code</h2>
             <input
               className="border p-2 w-full mb-3 rounded"
