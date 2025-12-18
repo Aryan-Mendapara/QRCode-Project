@@ -120,30 +120,39 @@ export default function HomePage() {
 
       {/* Update Modal */}
       {updateItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-800 text-black p-6 rounded shadow w-96">
-            <h2 className="text-xl font-bold mb-4">Update QR Code</h2>
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+          <div className="bg-white text-black dark:bg-white dark:text-white p-6 rounded-xl shadow-xl w-96">
+
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Update QR Code
+            </h2>
+
             <input
-              className="border p-2 w-full mb-3 rounded"
+              className="w-full p-2 mb-3 rounded bg-white text-black border dark:bg-gray-900 dark:text-white"
               value={updateItem.key}
               onChange={(e) =>
                 setUpdateItem({ ...updateItem, key: e.target.value })
               }
             />
+
             <input
-              className="border p-2 w-full mb-3 rounded"
+              className="w-full p-2 mb-4 rounded
+        bg-white text-black border
+        dark:bg-gray-900 dark:text-white"
               value={updateItem.url}
               onChange={(e) =>
                 setUpdateItem({ ...updateItem, url: e.target.value })
               }
             />
+
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setUpdateItem(null)}
-                className="px-4 py-2 bg-gray-400 text-white rounded cursor-pointer"
+                className="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer"
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleUpdate}
                 className="px-4 py-2 bg-green-600 text-white rounded cursor-pointer"
@@ -154,6 +163,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
