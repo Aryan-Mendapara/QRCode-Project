@@ -27,10 +27,10 @@ export default function AddQRPage() {
   };
 
   return (
-    <div className="h-screen flex justify-center items-center  transition-colors duration-300">
+    <div className="h-screen flex justify-center items-center dark:bg-black transition-colors duration-300">
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg shadow max-w-md w-full transition-colors duration-300"
+        className=" dark:bg-white text-white dark:text-black  p-8 rounded-lg shadow max-w-md w-full transition-colors duration-300"
       >
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
           Add QR Code
