@@ -59,7 +59,7 @@ export default function HomePage() {
 
       <table className="w-full border rounded-lg">
         <thead>
-          <tr className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white">
+          <tr className="bg-gray-200 text-gray-800 dark:text-white">
             <th className="border px-4 py-2">#</th>
             <th className="border px-4 py-2">Key</th>
             <th className="border px-4 py-2">URL</th>
@@ -103,7 +103,7 @@ export default function HomePage() {
       {/* Show QR Modal */}
       {showQRIndex !== null && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow text-center">
+          <div className="bg-white p-6 rounded shadow text-center">
             <QRCodeCanvas
               value={`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/qrcode/scan/${qrList[showQRIndex].key}`}
               size={200}
