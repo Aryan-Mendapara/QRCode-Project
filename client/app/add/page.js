@@ -27,7 +27,7 @@ export default function AddQRPage() {
   };
 
   return (
-    <div className="h-screen flex justify-center items-center dark:bg-gray-900 transition-colors duration-300">
+    <div className="h-screen flex justify-center items-center bg-white dark:bg-gray-900 transition-colors duration-300">
       <form
         onSubmit={handleSubmit}
         className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg shadow max-w-md w-full transition-colors duration-300"
