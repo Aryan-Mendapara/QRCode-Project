@@ -37,7 +37,7 @@ export default function AddQRPage() {
         </h1>
 
         <input
-          className="w-full border border-gray-300 px-3 py-2 mb-4 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-black px-3 py-2 mb-4 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Key"
           value={key}
           onChange={(e) => setKey(e.target.value)}
@@ -45,7 +45,7 @@ export default function AddQRPage() {
         />
 
         <input
-          className="w-full border border-gray-300 px-3 py-2 mb-4 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-black px-3 py-2 mb-4 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="URL"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
