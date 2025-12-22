@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
 import { useRef, useState, useEffect } from "react";
 import jsQR from "jsqr";
