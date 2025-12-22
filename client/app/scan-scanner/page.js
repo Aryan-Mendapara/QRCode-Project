@@ -2,16 +2,21 @@
 
 import { useRef, useState, useEffect } from "react";
 import jsQR from "jsqr";
+import { useSearchParams } from "next/navigation";
 
 export default function ScanUploadPage() {
     const [imgSrc, setImgSrc] = useState(null);
     const [qrData, setQrData] = useState(null);
     const [linkDetected, setLinkDetected] = useState(false);
+    const [finalUrl, setFinalUrl] = useState("");
+    const [uploadBtnText, setUploadBtnText] = useState("Upload a File");
 
     const canvasRef = useRef();
     const fileInputRef = useRef();
+    const searchParams = useSearchParams();
+    const mode = searchParams.get("mode"); // 'add' or 'remove'
 
-    // Load saved image and QR data from localStorage and redraw canvas
+    // Load saved image & QR data from localStorage
     useEffect(() => {
         const savedImg = localStorage.getItem("qrImage");
         const savedData = localStorage.getItem("qrData");
@@ -24,27 +29,17 @@ export default function ScanUploadPage() {
             img.onload = () => {
                 const canvas = canvasRef.current;
                 if (!canvas) return;
-                const ctx = canvas.getContext("2d");
+                const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
                 canvas.width = img.width;
                 canvas.height = img.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
 
-                // If QR data exists, decode again to draw bounding box
                 if (savedData) {
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    if (code) {
-                        ctx.strokeStyle = "red";
-                        ctx.lineWidth = 4;
-                        ctx.beginPath();
-                        ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
-                        ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
-                        ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
-                        ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
-                        ctx.closePath();
-                        ctx.stroke();
-                    }
+                    if (code) drawBoundingBox(ctx, code);
                 }
             };
         }
@@ -52,6 +47,7 @@ export default function ScanUploadPage() {
         if (savedData) {
             setQrData(savedData);
             setLinkDetected(savedData.startsWith("http"));
+            setFinalUrl(getFinalUrl(savedData));
         }
     }, []);
 
@@ -65,8 +61,6 @@ export default function ScanUploadPage() {
             setImgSrc(imgSrcValue);
             setQrData(null);
             setLinkDetected(false);
-
-            // Save image to localStorage
             localStorage.setItem("qrImage", imgSrcValue);
 
             const img = new Image();
@@ -75,7 +69,8 @@ export default function ScanUploadPage() {
             img.onload = () => {
                 const canvas = canvasRef.current;
                 if (!canvas) return;
-                const ctx = canvas.getContext("2d");
+                const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
                 canvas.width = img.width;
                 canvas.height = img.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -87,23 +82,13 @@ export default function ScanUploadPage() {
                 if (code) {
                     setQrData(code.data);
                     setLinkDetected(code.data.startsWith("http"));
-
-                    // Save QR data to localStorage
                     localStorage.setItem("qrData", code.data);
-
-                    // Draw bounding box
-                    ctx.strokeStyle = "red";
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
-                    ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
-                    ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
-                    ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
-                    ctx.closePath();
-                    ctx.stroke();
+                    setFinalUrl(getFinalUrl(code.data));
+                    drawBoundingBox(ctx, code);
                 } else {
                     setQrData("No QR code detected.");
                     setLinkDetected(false);
+                    setFinalUrl("");
                     localStorage.removeItem("qrData");
                 }
             };
@@ -115,14 +100,37 @@ export default function ScanUploadPage() {
         setImgSrc(null);
         setQrData(null);
         setLinkDetected(false);
+        setFinalUrl("");
         localStorage.removeItem("qrImage");
         localStorage.removeItem("qrData");
 
         const canvas = canvasRef.current;
         if (canvas) {
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+    };
+
+    const drawBoundingBox = (ctx, code) => {
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
+        ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
+        ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
+        ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
+        ctx.closePath();
+        ctx.stroke();
+    };
+
+    const getFinalUrl = (data) => {
+        if (!data) return "";
+        const segments = data.split("/");
+        const id = segments[segments.length - 1];
+
+        if (mode === "add") return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#addinventory/${id}`;
+        if (mode === "remove") return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#removeinventory/${id}`;
+        return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#item/show/${id}`;
     };
 
     return (
@@ -134,7 +142,7 @@ export default function ScanUploadPage() {
                     onClick={() => fileInputRef.current.click()}
                     className="py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
                 >
-                    Upload a File
+                    {uploadBtnText}
                 </button>
 
                 <button
@@ -144,6 +152,7 @@ export default function ScanUploadPage() {
                     Clear
                 </button>
             </div>
+
             <input
                 type="file"
                 accept="image/*"
@@ -160,14 +169,13 @@ export default function ScanUploadPage() {
             {qrData && (
                 <div className="mt-4 bg-gray-100 text-black p-4 rounded shadow w-full max-w-md text-center">
                     <p className="mb-2 break-all"><b>QR Data:</b> {qrData}</p>
-                    {linkDetected && (
-                        <a
-                            href={qrData}
-                            rel="noopener noreferrer"
-                            className="text-white py-2 px-4 rounded bg-green-600 hover:bg-green-700 transition inline-block cursor-pointer"
+                    {linkDetected && finalUrl && (
+                        <button
+                            onClick={() => window.location.href = finalUrl}
+                            className="text-white py-2 px-4 rounded bg-green-600 hover:bg-green-700 transition cursor-pointer"
                         >
                             Open Website
-                        </a>
+                        </button>
                     )}
                 </div>
             )}
