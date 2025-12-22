@@ -55,6 +55,20 @@ export default function HomePage() {
         >
           Scan QR Code
         </Link>
+        <Link
+          href="/scan-scanner?mode=add"
+          target="_blank"
+          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow"
+        >
+          Scan & Add
+        </Link>
+        <Link
+          href="/scan-scanner?mode=remove"
+          target="_blank"
+          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow"
+        >
+          Scan & Remove
+        </Link>
       </div>
 
       <table className="w-full border rounded-lg">
