@@ -17,6 +17,12 @@ export default function ScanUploadPage() {
     const searchParams = typeof window !== "undefined" ? useSearchParams() : null;
     const mode = searchParams?.get("mode"); // 'add' or 'remove'
 
+    const getHeading = () => {
+        if (mode === "add") return "Upload & Scan QR Code - Add Inventory";
+        if (mode === "remove") return "Upload & Scan QR Code - Remove Inventory";
+        return "Upload & Scan QR Code"; // default heading
+    };
+
     // Load saved image & QR data from localStorage
     useEffect(() => {
         const savedImg = localStorage.getItem("qrImage");
@@ -143,7 +149,9 @@ export default function ScanUploadPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6">Upload & Scan QR Code</h1>
+            <h1 className="text-3xl font-bold mb-6">
+                {getHeading()}
+            </h1>
 
             <div className="flex gap-2 mb-4">
                 <button
