@@ -46,23 +46,26 @@ export const getQRCodes = async (req, res) => {
 }
 
 export const scanQRCode = async (req, res) => {
-    try {
-        const { key } = req.params;
+  try {
+    const { key } = req.params;
 
-        const qr = await getQRCodeByKey(key);
+    const qr = await getQRCodeByKey(key);
 
-        if (!qr) {
-            return res.status(404).json({ error: "QR not found" });
-        }
-
-        // Redirect to the current URL stored in database        
-        res.redirect(qr.url);
-    } catch (error) {
-        console.error("❌ Error in scanQRCode:", error);
-        res.status(500).json({ error: "Internal server error" });
+    if (!qr) {
+      return res.status(404).json({ error: "QR not found" });
     }
-};
 
+    // ✅ ONLY SEND DATA (NO REDIRECT)
+    res.status(200).json({
+      key: qr.key,
+      url: qr.url
+    });
+
+  } catch (error) {
+    console.error("❌ Error in scanQRCode:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 export const updateQRCode = async (req, res) => {
     try {

@@ -45,20 +45,3 @@ export const deleteQRCode = async (id) => {
     throw error;
   }
 };
-
-export const scanQRCode = async (req, res) => {
-  try {
-    const { key } = req.params;
-
-    const qr = await getQRCodeByKey(key);
-
-    if (!qr) {
-      return res.status(404).json({ error: "QR not found" });
-    }
-
-    res.redirect(qr.url);
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-

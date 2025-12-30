@@ -71,7 +71,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-       {/* ================= DESKTOP TABLE ================= */}
+      {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full border rounded-lg">
           <thead>
@@ -91,9 +91,24 @@ export default function HomePage() {
                 <td className="border px-4 py-2 truncate max-w-xs">{item.url}</td>
                 <td className="border px-4 py-2">
                   <div className="flex justify-center gap-2">
-                    <button onClick={() => setShowQRIndex(index)} className="btn-sm bg-green-500">Show</button>
-                    <button onClick={() => setUpdateItem(item)} className="btn-sm bg-yellow-500">Update</button>
-                    <button onClick={() => handleDelete(item.id)} className="btn-sm bg-red-500">Delete</button>
+                    <button
+                      onClick={() => setShowQRIndex(index)}
+                      className="btn-sm bg-green-500"
+                    >
+                      Show
+                    </button>
+                    <button
+                      onClick={() => setUpdateItem(item)}
+                      className="btn-sm bg-yellow-500"
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="btn-sm bg-red-500"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -111,9 +126,24 @@ export default function HomePage() {
             <p className="break-all"><b>URL:</b> {item.url}</p>
 
             <div className="flex gap-2 mt-3">
-              <button onClick={() => setShowQRIndex(index)} className="btn-sm px-2 py-1 bg-green-500 rounded">Show</button>
-              <button onClick={() => setUpdateItem(item)} className="btn-sm px-2 py-1 bg-yellow-500 rounded">Update</button>
-              <button onClick={() => handleDelete(item.id)} className="btn-sm px-2 py-1 bg-red-500 rounded">Delete</button>
+              <button
+                onClick={() => setShowQRIndex(index)}
+                className="btn-sm px-2 py-1 bg-green-500 rounded"
+              >
+                Show
+              </button>
+              <button
+                onClick={() => setUpdateItem(item)}
+                className="btn-sm px-2 py-1 bg-yellow-500 rounded"
+              >
+                Update
+              </button>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="btn-sm px-2 py-1 bg-red-500 rounded"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
@@ -127,7 +157,12 @@ export default function HomePage() {
               value={`${process.env.NEXT_PUBLIC_BACKEND_URL}/project/qrcode/scan/${qrList[showQRIndex].key}`}
               size={200}
             />
-            <button onClick={() => setShowQRIndex(null)} className="btn bg-blue-600 mt-4">Close</button>
+            <button
+              onClick={() => setShowQRIndex(null)}
+              className="btn bg-blue-600 mt-4"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
@@ -150,8 +185,18 @@ export default function HomePage() {
             />
 
             <div className="flex justify-end gap-3 mt-4">
-              <button onClick={() => setUpdateItem(null)} className="btn-sm bg-gray-500">Cancel</button>
-              <button onClick={handleUpdate} className="btn-sm bg-green-600">Save</button>
+              <button
+                onClick={() => setUpdateItem(null)}
+                className="btn-sm bg-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="btn-sm bg-green-600"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
