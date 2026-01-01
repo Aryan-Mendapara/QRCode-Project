@@ -1,59 +1,36 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import jsQR from "jsqr";
+import { Html5Qrcode } from "html5-qrcode";
 
 export default function ScanUploadPage() {
     const [imgSrc, setImgSrc] = useState(null);
     const [qrData, setQrData] = useState(null);
     const [linkDetected, setLinkDetected] = useState(false);
     const [finalUrl, setFinalUrl] = useState("");
+    const [cameraOn, setCameraOn] = useState(false);
 
     const canvasRef = useRef();
     const fileInputRef = useRef();
+    const qrRef = useRef(null);
 
     const searchParams = typeof window !== "undefined" ? useSearchParams() : null;
-    const mode = searchParams?.get("mode"); // 'add' or 'remove'
+    const mode = searchParams?.get("mode");
 
     const getHeading = () => {
-        if (mode === "add") return "Upload & Scan QR Code - Add Inventory";
-        if (mode === "remove") return "Upload & Scan QR Code - Remove Inventory";
-        return "Upload & Scan QR Code"; // default heading
+        if (mode === "add") return "Upload / Scan QR Code - Add Inventory";
+        if (mode === "remove") return "Upload / Scan QR Code - Remove Inventory";
+        return "Upload / Scan QR Code";
     };
 
-    // Load saved image & QR data from localStorage
-    useEffect(() => {
-        const savedImg = localStorage.getItem("qrImage");
-        const savedData = localStorage.getItem("qrData");
-
-        if (savedImg) {
-            setImgSrc(savedImg);
-            const img = new Image();
-            img.src = savedImg;
-
-            img.onload = () => {
-                const canvas = canvasRef.current;
-                if (!canvas) return;
-                const ctx = canvas.getContext("2d", { willReadFrequently: true });
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-
-                if (savedData) drawBoundingBox(ctx, savedData);
-            };
-        }
-
-        if (savedData) {
-            setQrData(savedData);
-            setLinkDetected(savedData.startsWith("http"));
-            setFinalUrl(getFinalUrl(savedData));
-        }
-    }, [mode]);
+    /* ================= IMAGE UPLOAD ================= */
 
     const handleFileChange = (e) => {
+        if (cameraOn) return; // 🔹 camera already active, ignore upload
+
         const file = e.target.files[0];
         if (!file) return;
 
@@ -64,18 +41,14 @@ export default function ScanUploadPage() {
             setQrData(null);
             setLinkDetected(false);
 
-            localStorage.setItem("qrImage", imgSrcValue);
-
             const img = new Image();
             img.src = imgSrcValue;
 
             img.onload = () => {
                 const canvas = canvasRef.current;
-                if (!canvas) return;
                 const ctx = canvas.getContext("2d", { willReadFrequently: true });
                 canvas.width = img.width;
                 canvas.height = img.height;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -86,9 +59,6 @@ export default function ScanUploadPage() {
                     setLinkDetected(code.data.startsWith("http"));
                     setFinalUrl(getFinalUrl(code.data));
 
-                    localStorage.setItem("qrData", code.data);
-
-                    // Draw bounding box
                     ctx.strokeStyle = "red";
                     ctx.lineWidth = 4;
                     ctx.beginPath();
@@ -99,71 +69,118 @@ export default function ScanUploadPage() {
                     ctx.closePath();
                     ctx.stroke();
                 } else {
-                    setQrData("No QR code detected.");
-                    setLinkDetected(false);
-                    localStorage.removeItem("qrData");
+                    setQrData("No QR code detected");
                 }
             };
         };
         reader.readAsDataURL(file);
     };
 
-    const handleClear = () => {
+    /* ================= CAMERA SCAN ================= */
+
+    useEffect(() => {
+        if (!cameraOn) return;
+
+        // 🔹 If image is uploaded, disable camera
+        if (imgSrc) {
+            setCameraOn(false);
+            return;
+        }
+
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        qrRef.current = html5QrCode;
+
+        html5QrCode
+            .start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 400 }, // 🔹 bigger QR box
+                async (decodedText) => {
+                    await html5QrCode.stop();
+                    await html5QrCode.clear();
+
+                    setCameraOn(false);
+                    setQrData(decodedText);
+                    setLinkDetected(decodedText.startsWith("http"));
+                    setFinalUrl(getFinalUrl(decodedText));
+                }
+            )
+            .catch(() => {
+                alert("Camera access denied");
+                setCameraOn(false);
+            });
+
+        return () => {
+            if (html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => { });
+            }
+        };
+    }, [cameraOn, imgSrc]);
+
+    /* ================= COMMON ================= */
+
+    const getFinalUrl = (data) => {
+        if (!data) return "";
+        const id = data.split("/").pop();
+
+        if (mode === "add")
+            return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#addinventory/${id}`;
+        if (mode === "remove")
+            return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#removeinventory/${id}`;
+        return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#item/show/${id}`;
+    };
+
+    const handleClear = async () => {
+        if (qrRef.current) {
+            try {
+                if (qrRef.current.isScanning) await qrRef.current.stop();
+                qrRef.current.clear();
+            } catch (e) {
+                console.warn("Camera already stopped");
+            }
+            qrRef.current = null;
+        }
+
+        setCameraOn(false);
         setImgSrc(null);
         setQrData(null);
         setLinkDetected(false);
-        localStorage.removeItem("qrImage");
-        localStorage.removeItem("qrData");
+        setFinalUrl("");
 
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-    };
-
-    const getFinalUrl = (data) => {
-        if (!data) return "";
-        const segments = data.split("/");
-        const id = segments[segments.length - 1];
-
-        if (mode === "add") return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#addinventory/${id}`;
-        if (mode === "remove") return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#removeinventory/${id}`;
-        return `https://acdc2.canvusapps.com/ims/aamsuratgujarat/catalogs#item/show/${id}`;
-    };
-
-    const drawBoundingBox = (ctx, data) => {
-        const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if (!code) return;
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(code.location.topLeftCorner.x, code.location.topLeftCorner.y);
-        ctx.lineTo(code.location.topRightCorner.x, code.location.topRightCorner.y);
-        ctx.lineTo(code.location.bottomRightCorner.x, code.location.bottomRightCorner.y);
-        ctx.lineTo(code.location.bottomLeftCorner.x, code.location.bottomLeftCorner.y);
-        ctx.closePath();
-        ctx.stroke();
-    };
+    };    
 
     return (
-        <div className="min-h-screen flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6">
-                {getHeading()}
-            </h1>
+        <div className="min-h-screen flex flex-col items-center p-6">
+            <h1 className="text-3xl font-bold mb-6">{getHeading()}</h1>
 
             <div className="flex gap-2 mb-4">
-                <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="py-2 px-6 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
-                >
-                    Upload a File
-                </button>
+                {/* 🔹 Upload Image button only if camera is OFF */}
+                {!cameraOn && (
+                    <button
+                        onClick={() => fileInputRef.current.click()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+                    >
+                        Upload Image
+                    </button>
+                )}
+
+                {/* 🔹 Camera button only if no image uploaded */}
+                {!imgSrc && (
+                    <button
+                        onClick={() => setCameraOn(true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer"
+                    >
+                        Open Camera
+                    </button>
+                )}
 
                 <button
                     onClick={handleClear}
-                    className="py-2 px-6 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
                 >
                     Clear
                 </button>
@@ -173,22 +190,49 @@ export default function ScanUploadPage() {
                 type="file"
                 accept="image/*"
                 ref={fileInputRef}
+                hidden
                 onChange={handleFileChange}
-                className="hidden"
             />
 
+            {/* ================= UI ================= */}
             <canvas
                 ref={canvasRef}
-                style={{ display: imgSrc ? "block" : "none", maxWidth: "100%", maxHeight: "400px" }}
+                className="shadow-md"
+                style={{
+                    width: imgSrc ? "500px" : "0px",  // 🔹 Upload image width
+                    height: imgSrc ? "400px" : "0px", // 🔹 Upload image height
+                    maxWidth: "100%",
+                    objectFit: "cover",
+                }}
             />
 
+            {cameraOn && (
+                <div
+                    id="qr-reader"
+                    className="rounded-lg shadow-md mt-4"
+                    style={{
+                        width: "350px",   // 🔹 smaller size for camera
+                        height: "250px",  // 🔹 smaller height
+                        overflow: "hidden",
+                    }}
+                />
+            )}
+
+            {cameraOn && !imgSrc && (
+                <div
+                    id="qr-reader"
+                    className="rounded-lg shadow-md mt-4"
+                    style={{ width: "600px", height: "450px" }}
+                />
+            )}
+
             {qrData && (
-                <div className="mt-4 bg-gray-100 text-black p-4 rounded shadow w-full max-w-md text-center">
-                    <p className="mb-2 break-all"><b>QR Data:</b> {qrData}</p>
-                     {linkDetected && finalUrl && (
+                <div className="mt-4 bg-gray-100 text-black p-4 rounded text-center w-full max-w-md">
+                    <p className="break-all mb-3"><b>QR Data:</b> {qrData}</p>
+                    {linkDetected && finalUrl && (
                         <button
                             onClick={() => window.location.href = finalUrl}
-                            className="text-white py-2 px-4 rounded bg-green-600 hover:bg-green-700 transition cursor-pointer"
+                            className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer"
                         >
                             Open Website
                         </button>

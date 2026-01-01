@@ -45,3 +45,16 @@ export const deleteQRCode = async (id) => {
     throw error;
   }
 };
+
+// SCAN QR (OPEN FROM QR)
+export const scanQRCode = async (key) => {
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/project/qrcode/scan/${key}`
+    );
+    return res.data;
+  } catch (err) {
+    console.error("❌ Error scanning QR:", err);
+    throw err;
+  }
+};
