@@ -19,7 +19,7 @@ export default function ScanUploadPage() {
     const qrRef = useRef(null);
 
     const searchParams = typeof window !== "undefined" ? useSearchParams() : null;
-    const mode = searchParams?.get("mode");    
+    const mode = searchParams?.get("mode");
 
     useEffect(() => {
         if (!searchParams) return;
@@ -94,27 +94,25 @@ export default function ScanUploadPage() {
         html5QrCode
             .start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 400 }, // 🔹 bigger QR box
+                { fps: 10, qrbox: 400 },
                 async (decodedText) => {
+                    // 🔹 Stop and clear scanner
                     await html5QrCode.stop();
                     await html5QrCode.clear();
-
                     setCameraOn(false);
+
+                    // 🔹 Set state (optional)
                     setQrData(decodedText);
                     setLinkDetected(decodedText.startsWith("http"));
                     setFinalUrl(getFinalUrl(decodedText));
+
+                    // 🔹 Automatic redirect if link
+                    if (decodedText.startsWith("http")) {
+                        window.location.href = getFinalUrl(decodedText); // 🔹 auto open
+                    }
                 }
             )
-            .catch(() => {
-                alert("Camera access denied");
-                setCameraOn(false);
-            });
 
-        return () => {
-            if (html5QrCode.isScanning) {
-                html5QrCode.stop().catch(() => { });
-            }
-        };
     }, [cameraOn, imgSrc]);
 
     /* ================= COMMON ================= */
